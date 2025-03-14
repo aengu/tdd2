@@ -11,12 +11,21 @@ database constraints?
 
 그러면 clean 매서드는 왜 만든건지?
 - form 제출된 시점에 db에 해당 데이터를 보내기 전에 유효성 검사 오류가 있는 경우
-- 해당 양식을 반환하고 사용자가 오류를 수정할 수 있게 하여 데이터베이스 왕복을 방지하기 위해.
+- 해당 양식을 반환하고 사용자가 오류를 수정할 수 있게 하여 불필요한 데이터베이스 왕복을 방지하기 위해.
+"""
+
+"""
+https://docs.djangoproject.com/ko/5.1/topics/testing/tools/#django.test.TestCase.setUpTestData
+setUpTestData
+- 전체 테스트사례에 대해 *한 번만* 생성됨
+- setup의 일부로 데이터베이스에 많은 개체를 만들고, 한 번만 수행하면 되는 경우에 사용
+- 당연히 setup보다 빠르다!
 """
 
 class ProductModelTest(TestCase):
-    def setUp(self):
-        self.product = Product(name='Test Product', price=100.00, stock_count=10)
+    @classmethod #클래스메서드 데코레이터, 매개변수에 self대신 cls로 해야함
+    def setUpTestData(cls):
+        cls.product = Product(name='Test Product', price=100.00, stock_count=10) # 클래스변수: 모든 인스턴스가 공유함, 접근할땐 똑같이 self.product로
 
     def test_in_stock_property(self):
         self.assertTrue(self.product.is_stock)
