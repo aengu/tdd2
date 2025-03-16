@@ -39,19 +39,20 @@ class ProductModelTest(TestCase):
         self.assertEqual(self.product.get_discounted_price(100), 0)
         self.assertEqual(self.product.get_discounted_price(0), 100)
     
-    def test_negative_price_validation(self):
-        self.product.clean()
+    # 이제 form에서 각 필드 유효성검사를 하므로 굳이 테스트할 이유x
+    # def test_negative_price_validation(self):
+    #     self.product.clean()
 
-        self.product.price = -1
-        with self.assertRaises(ValidationError): #매개변수인 예상하는 예외가 발생하지 않으면 테스트 실패, 예상된 예외가 아닌 다른 예외 발생 시에도 실패
-            self.product.clean()
+    #     self.product.price = -1
+    #     with self.assertRaises(ValidationError): #매개변수인 예상하는 예외가 발생하지 않으면 테스트 실패, 예상된 예외가 아닌 다른 예외 발생 시에도 실패
+    #         self.product.clean()
     
-    def test_negative_stock_validation(self):
-            self.product.clean()
+    # def test_negative_stock_validation(self):
+    #         self.product.clean()
 
-            self.product.stock_count = -1
-            with self.assertRaises(ValidationError): #매개변수인 예상하는 예외가 발생하지 않으면 테스트 실패, 예상된 예외가 아닌 다른 예외 발생 시에도 실패
-                self.product.clean()
+    #         self.product.stock_count = -1
+    #         with self.assertRaises(ValidationError): #매개변수인 예상하는 예외가 발생하지 않으면 테스트 실패, 예상된 예외가 아닌 다른 예외 발생 시에도 실패
+    #             self.product.clean()
     
     def test_negative_price_constraint(self):
         """데이터베이스 제약조건으로 product의 price속성에 음수가 저장이 안되는지 테스트"""

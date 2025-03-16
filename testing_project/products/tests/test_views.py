@@ -65,7 +65,7 @@ class TestProductPage(TestCase):
     
     def test_products_context(self):
         response = self.client.get(reverse('products'))
-        self.assertEqual(len(response.context), 2)
+        self.assertEqual(len(response.context['products']), 2)
         self.assertContains(response, "Laptop")
         self.assertContains(response, "Phone")
         self.assertNotContains(response, "no products available")
@@ -75,4 +75,5 @@ class TestProductPage(TestCase):
         Product.objects.all().delete()
         response = self.client.get(reverse('products'))
         self.assertContains(response, "no products available")
-        self.assertEqual(len(response.context), 0)
+        # self.assertEqual(len(response.context), 0) # 이제 context에 form도 포함되므로 context['products']로 접근해야함
+        self.assertQuerysetEqual(response.context['products'], [])
