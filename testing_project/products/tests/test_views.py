@@ -1,6 +1,6 @@
 from django.test import TestCase, SimpleTestCase
 from django.urls import reverse
-from products.models import Product
+from products.models import Product, User
 
 """
 전체 테스트 진행 명령어
@@ -23,6 +23,40 @@ assertContains
 - 만약 count가 None이면, 해당 텍스트가 적어도 한 번 이상 포함되어 있으면 검증 성공
 - 텍스트만 되지, Product 특정 객체가 있는지(self.assertContains(response, p)) 이런식은 안되나보다.
 """
+
+"""
+1. User.objects.create(**user_data)
+2. User.objects.create_user(**user_data)
+1번처럼 유저객체 만들면 안된다.. 저러면 그냥 password에 'password123'라는 plain text가 저장됨.
+2번처럼 creatr_user로 만들어야 password에 해싱된 값으로 저장됨.
+해싱된 암호를 비교하여 로그인하는거라 1번처럼 만들면 인증 다 안된다... 아니 이걸 까먹다니
+"""
+
+class TestProfilePage(TestCase):
+
+    def test_profile_view_accesible_for_anonymose_users(self):
+        "로그인 하지 않은 유저가 profile페이지에 접근할 경우 login페이지로 리디렉션되는지 테스트"
+        response = self.client.get(reverse('profile'))
+
+        # 리디렉트되는지 확인
+        self.assertRedirects(response, expected_url=f"{reverse('login')}?next={reverse('profile')}")
+
+    def test_profile_view_accessible_for_authenticated_users(self):
+        "로그인한 유저가 profile페이지에 접근하여 username이 제대로 나오는지 테스트"
+        # 테스트 유저 생성
+        user_data = {
+            'username' : 'test_user',
+            'password' : 'password123'
+        }
+        User.objects.create_user(**user_data)
+
+        # 테스트유저 로그인
+        # response = self.client.post(reverse('login'), data=data) # 아래가 더 직관적
+        self.client.login(username='test_user', password='password123')
+        response = self.client.get(reverse('profile'))
+
+        # response content에 username이 포함되어 있는지 확인
+        self.assertContains(response, 'test_user')
 
 
 class TestHomePage(SimpleTestCase):
