@@ -1,6 +1,8 @@
 from django.test import TestCase, SimpleTestCase
 from django.urls import reverse
 from products.models import Product, User
+from unittest.mock import patch
+import requests
 
 """
 전체 테스트 진행 명령어
@@ -32,17 +34,62 @@ assertContains
 해싱된 암호를 비교하여 로그인하는거라 1번처럼 만들면 인증 다 안된다... 아니 이걸 까먹다니
 """
 
+"""
+* patching과 mocking 차이점
+- patching: 특정 모듈 또는 객체의 일부를 변경하여 테스트함. 여기서는 @patch를 통해 mock 객체로 바꿔 테스트함
+- mocking: python의 unittest.mock.Mock으로 실제 객체를 가짜 객체로 대체함
+"""
+
+class PostViewTest(TestCase):
+
+    # product.views모듈에서 requests.get을 호출하는 부분은 다 mock으로 대체됨 -> 즉, 실제 요청을 보내지 않고 가짜 응답을 받음
+    @patch('products.views.requests.get')
+    def test_post_view_success(self, mock_get): # mock_get: request.get을 대체하는 MagicMock 객체
+        """post view가 정상적으로 응답할 때 올바른 Json 데이터를 반환하는지 테스트"""
+        mock_get.return_value.status_code = 200
+        return_data = {
+            "userId": 1,
+            "id": 1,
+            "title": "Test Title",
+            "body": "Test Body"
+        }
+        mock_get.return_value.json.return_value = return_data # response.json()에서 위의 dict를 반환하도록 mock 설정
+
+        # view로 request 요청
+        response = self.client.get(reverse('post'))
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(response.content, return_data)
+
+        # mock api가 정확한 Url로 한 번만 호출 되었는지 확인
+        mock_get.assert_called_once_with('https://jsonplaceholder.typicode.com/posts/1')
+
+    @patch('products.views.requests.get')
+    def test_post_view_fail(self, mock_get):
+        """post view가 http 503에러를 반환하는지 테스트"""
+
+        # 실패를 가정하여 requests.get 호출 시 예외 발생
+        mock_get.side_effect = requests.exceptions.RequestException
+
+        # view로 request 요청
+        response = self.client.get(reverse('post'))
+
+        # view가 503 서버 에러를 반환하는지 확인
+        self.assertEqual(response.status_code, 503)
+        mock_get.assert_called_once_with('https://jsonplaceholder.typicode.com/posts/1')
+
+
+
 class TestProfilePage(TestCase):
 
     def test_profile_view_accesible_for_anonymose_users(self):
-        "로그인 하지 않은 유저가 profile페이지에 접근할 경우 login페이지로 리디렉션되는지 테스트"
+        """로그인 하지 않은 유저가 profile페이지에 접근할 경우 login페이지로 리디렉션되는지 테스트"""
         response = self.client.get(reverse('profile'))
 
         # 리디렉트되는지 확인
         self.assertRedirects(response, expected_url=f"{reverse('login')}?next={reverse('profile')}")
 
     def test_profile_view_accessible_for_authenticated_users(self):
-        "로그인한 유저가 profile페이지에 접근하여 username이 제대로 나오는지 테스트"
+        """로그인한 유저가 profile페이지에 접근하여 username이 제대로 나오는지 테스트"""
         # 테스트 유저 생성
         user_data = {
             'username' : 'test_user',
