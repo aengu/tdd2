@@ -42,6 +42,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'products.midleware.MaintenanceModeMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -123,3 +124,4 @@ STATIC_URL = '/static/'
 AUTH_USER_MODEL = 'products.User'
 LOGIN_URL = '/login/'
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend" # console backend: 실제 이메일을 보내는 대신, 콘솔에 stdout한다.
+MAINTENANCE_MODE = True
