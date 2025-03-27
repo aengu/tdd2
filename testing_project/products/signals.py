@@ -4,7 +4,15 @@ from django.core.mail import send_mail
 from .models import User
 
 """
-shell에서 create_user할 때 email을 넣어야 한다;
+https://docs.djangoproject.com/ko/5.1/topics/signals/
+* signal
+- django에서는 signal dispatcher(신호 전달자?)가 있어 프레임워크 안에 분리된 어플레이케이션 사이에 발생하는 동작을 감지할 수 있다.
+- 특정 발신자가 여러 이벤트가 발생했음을 다수의 수신자에게 알릴 수 있다.
+- signal을 개발자가 임의로 만들 수 있지만 보통 django에서 제공하는 것을 사용한다 post/pre save,init,migrate 등등
+- 이 signal을 받으려면 callback함수인 receiver를 등록해야 한다.
+"""
+
+"""
 Content-Type: text/plain; charset="utf-8"
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
