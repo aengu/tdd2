@@ -1,4 +1,4 @@
-from django.test import TestCase, SimpleTestCase
+from django.test import TestCase, SimpleTestCase, tag
 from django.urls import reverse
 from products.models import Product, User
 from unittest.mock import patch
@@ -38,6 +38,13 @@ assertContains
 * patching과 mocking 차이점
 - patching: 특정 모듈 또는 객체의 일부를 변경하여 테스트함. 여기서는 @patch를 통해 mock 객체로 바꿔 테스트함
 - mocking: python의 unittest.mock.Mock으로 실제 객체를 가짜 객체로 대체함
+"""
+
+"""
+인증과 관련된 테스트 케이스만 진행하고 싶다면?
+1. 해당 케이스에 @path('auth')하고
+2. python manage.py test products.tests.test_views --tag=auth --settings=test_settings
+    이렇게 명령어에 tag=auth를 지정해주면 된다.
 """
 
 class PostViewTest(TestCase):
@@ -88,6 +95,7 @@ class TestProfilePage(TestCase):
         # 리디렉트되는지 확인
         self.assertRedirects(response, expected_url=f"{reverse('login')}?next={reverse('profile')}")
 
+    @tag('auth')
     def test_profile_view_accessible_for_authenticated_users(self):
         """로그인한 유저가 profile페이지에 접근하여 username이 제대로 나오는지 테스트"""
         # 테스트 유저 생성
